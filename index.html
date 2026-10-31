@@ -182,6 +182,9 @@
                 <div class="mt-3 p-3 bg-slate-50 border-l-4 border-teal-600 rounded text-xs text-slate-700">
                     <strong class="font-semibold text-slate-900">Day 1 rule (adopted):</strong> Store the master copy unprojected in WGS 84; project on demand into the native UTM zone for every metric step; record both the storage CRS and the analysis CRS against every dataset. A coordinate frame mixed between global, national-grid and local systems produces a <em>displacement</em>, not noise.
                 </div>
+                <div class="mt-2 p-3 bg-amber-50 border-l-4 border-amber-500 rounded text-xs text-amber-900">
+                    <strong class="font-semibold">The on-the-fly trap (Day 1 · QGIS):</strong> assigning a CRS to a layer is <em>not</em> the same as reprojecting it, and QGIS's on-the-fly reprojection redraws layers for the screen only — it does <em>not</em> change the stored coordinates. Three orthomosaics that refuse to line up in one project are far more likely a genuine CRS mismatch on file than a display bug. Check each layer's assigned CRS against this rule before touching anything else.
+                </div>
             </div>
 
             <!-- Archipelagic Spatial Reference Matrix -->
@@ -471,6 +474,11 @@
                         <strong>Rule:</strong> Single scalar shift &Delta;Z applies strictly across localized UAV flight blocks (&le; 3 km). For corridors &gt; 5 km, linear interpolation between leveled benchmarks is required. The same &Delta;Z is applied <em>before</em> any inundation comparison (Day 3 datum check).
                     </div>
                 </div>
+            </div>
+
+            <!-- Callout: never publish a bare height (Day 1) -->
+            <div class="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-r-xl text-xs text-amber-900">
+                <strong class="font-semibold">Never publish a bare height (Day 1):</strong> an elevation of <em>2.4 m</em> is not yet an answer — 2.4 m above what? Inundation and drainage work for Kiribati means heights referenced to a stated vertical datum (TGZ, LAT/CD, or MSL), not to a float's reading. Give every published elevation its reference surface, and where the reference cannot be stated, say "ungrounded — do not use for flooding." The number an officer cannot reproduce is the number that gets misused downstream.
             </div>
 
             <!-- Outer-Island TBM Protocol Stepper -->
@@ -1251,6 +1259,48 @@
 
             </div>
 
+            <!-- Job Aid: Cartographic Output -->
+            <div class="job-aid bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200" data-aid="carto">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>&#127757; Job Aid — Cartographic Output (the map that leaves the division)</span>
+                    <button onclick="exportChecklist('carto')" class="no-print text-[10px] bg-teal-700 text-white px-2.5 py-1 rounded font-semibold hover:bg-teal-600">Export (txt)</button>
+                </h3>
+                <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">Finish list for every map that goes to a planner. Half the questions a user asks about a layer are answered by the map itself: what it covers, what it is called, what it is measured against, when it was made. A map carrying these answers works for someone who never opens the attribute table.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs mt-3">
+                    <label class="check-item"><input type="checkbox" data-item><span>Title states <strong>subject AND place</strong> (island)</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Scale bar present and correct for the CRS in use</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>North arrow (grid north labelled, not assumed)</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Legend covers every layer shown — nothing missing, nothing orphaned</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Attribution line naming the data sources</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Coordinate reference system printed (name + EPSG) for the <em>source</em> data</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Production date + version — a map without a date cannot be compared with another version</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Vertical reference stated wherever heights/depths are shown (m TGZ)</span></label>
+                </div>
+                <div class="mt-3 p-2.5 bg-teal-50 border border-teal-200 rounded-lg text-[11px] text-teal-900">
+                    <strong>Rule:</strong> the layout is set once in the QGIS project template so compliance is the default, not an extra step. The map layout is evaluated as one requirement with the dataset — a correct layer on a map without these eight items is still not a deliverable.
+                </div>
+            </div>
+
+            <!-- Job Aid: Project Folder Skeleton -->
+            <div class="job-aid bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200" data-aid="files">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>&#128193; Job Aid — Project Folder Skeleton (stranger test)</span>
+                    <button onclick="exportChecklist('files')" class="no-print text-[10px] bg-teal-700 text-white px-2.5 py-1 rounded font-semibold hover:bg-teal-600">Export (txt)</button>
+                </h3>
+                <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">Lay every project down in the same shape so a stranger — another officer, a reviewer, a successor — can tell <em>delivered</em> from <em>derived</em> by location alone, without asking.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs mt-3">
+                    <label class="check-item"><input type="checkbox" data-item><span>One folder per island (e.g. <code class="bg-slate-100 px-1 rounded font-mono">makin/</code>) — one island's work, nothing else</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span><code class="bg-slate-100 px-1 rounded font-mono">raw/</code> &mdash; data exactly as delivered; nothing edited in place</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span><code class="bg-slate-100 px-1 rounded font-mono">processed/</code> &mdash; reprojected, clipped, cleaned layers</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span><code class="bg-slate-100 px-1 rounded font-mono">analysis/</code> &mdash; derived layers (hazard, exposure, zoning)</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span><code class="bg-slate-100 px-1 rounded font-mono">output/</code> &mdash; maps, briefs, geodatabase export</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>ST-code / metadata for each dataset sits beside the data it describes</span></label>
+                </div>
+                <div class="mt-3 p-2.5 bg-teal-50 border border-teal-200 rounded-lg text-[11px] text-teal-900">
+                    <strong>Test:</strong> hand a fresh officer a folder and ask "which file was delivered and which did we make?" If they need more than the path to answer, the skeleton is wrong. The <code class="bg-slate-100 px-1 rounded font-mono">raw/</code>-vs-<code class="bg-slate-100 px-1 rounded font-mono">processed/</code> separation is the part most often skipped — the one that protects the delivered data from drifting.
+                </div>
+            </div>
+
             <!-- Job Aid: Delivery & Archive -->
             <div class="job-aid bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200" data-aid="delivery">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
@@ -1305,6 +1355,47 @@
                 </div>
             </div>
 
+            <!-- National coverage gap card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-rose-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#128506; National Coverage Gap — one bare-earth surface, five islands</span>
+                    <span class="text-xs bg-rose-100 text-rose-700 font-mono px-2 py-0.5 rounded">Day 3 · S1</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    The programme holds <strong class="text-slate-900">exactly one bare-earth elevation surface</strong>. Every inundation step in this tab is geographically confined to the island that surface covers. Orthomosaics exist for more; a surface does not.
+                </p>
+                <table class="w-full text-left text-xs border-collapse mb-3">
+                    <thead>
+                        <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                            <th class="p-2">Island</th>
+                            <th class="p-2">LiDAR bare-earth DTM</th>
+                            <th class="p-2">Orthomosaic</th>
+                            <th class="p-2">Elevation usable for inundation</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 text-slate-600">
+                        <tr>
+                            <td class="p-2 font-medium text-slate-900">South Tarawa</td>
+                            <td class="p-2">1 m + flood-zone rasters derived (IKO-flood) &#9989;</td>
+                            <td class="p-2">&#9989;</td>
+                            <td class="p-2 font-semibold text-teal-700">Yes — the only island</td>
+                        </tr>
+                        <tr>
+                            <td class="p-2 font-medium text-slate-900">Makin</td>
+                            <td class="p-2 text-rose-700" rowspan="4">&#10060; none — orthomosaic only</td>
+                            <td class="p-2">&#9989;</td>
+                            <td class="p-2" rowspan="4">No — orthomosaic layers are imagery, not a surface.</td>
+                        </tr>
+                        <tr><td class="p-2 font-medium text-slate-900">Kuria</td><td class="p-2">&#9989;</td></tr>
+                        <tr><td class="p-2 font-medium text-slate-900">Onotoa</td><td class="p-2">&#9989;</td></tr>
+                        <tr><td class="p-2 font-medium text-slate-900">Kiritimati</td><td class="p-2">&#9989;</td></tr>
+                    </tbody>
+                </table>
+                <div class="p-2.5 bg-rose-50 border-l-4 border-rose-500 rounded text-xs text-rose-900">
+                    <strong class="font-semibold">This is a project data gap, not a training deficiency — and no amount of processing closes it.</strong> A bare-earth elevation surface must be <em>surveyed</em> (LiDAR or ground-measured control); it cannot be derived from an orthomosaic. State the coverage limit in every brief — it answers the first question every planner asks, and it is exactly the gap the survey SOP (Tab 3) and pipeline above exist to close.
+                </div>
+            </div>
+
             <!-- Coastal inundation methodology -->
             <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center justify-between">
@@ -1345,6 +1436,97 @@
                             <p class="text-[11px] text-amber-900/80 leading-relaxed">In the IKO-flood runs the island rim acts as a bowl: <strong>321.84 ha</strong> of land below T3 with only a <strong>5.7 cm</strong> lip to keep the ocean out &mdash; breaching the rim drops interior flooding by <strong>86%</strong>. This is why the connectivity filter and breaching steps are not optional polish; they are the difference between an alarm and an evacuation plan.</p>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Tidal-stage correction card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-sky-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#128344; Tidal-Stage Correction — shorelines measure the tide at capture time</span>
+                    <span class="text-xs bg-sky-100 text-sky-800 font-mono px-2 py-0.5 rounded">Day 1 · S5 / Day 3 · S1</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    Shorelines are digitised from imagery, and imagery is captured at a moment. With <strong>1–2 m of tidal range</strong> in Kiribati, the waterline in a single image is set by the tide at capture time, not by the shape of the shore. Two passes at different stages measure the tide, not the coast — among the largest single error sources in atoll shoreline work, and invisible in the output: the resulting offset is shipped inside the rates as if it were change.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Record 1</div>
+                        <strong class="text-slate-900">Capture time</strong>
+                        <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">to the minute, for every image flight. Cross-checked against flight logs, not the drone clock alone.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Record 2</div>
+                        <strong class="text-slate-900">Tidal stage</strong>
+                        <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">gauge <em>or</em> model, at that place and time — and record which. A model stage carries the model's uncertainty with it.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Record 3</div>
+                        <strong class="text-slate-900">Beach slope</strong>
+                        <p class="text-[11px] text-slate-600 mt-0.5 leading-relaxed">the piece most often missing. An assumed slope is an assumption to <em>state</em>, not a calculation to hide.</p>
+                    </div>
+                </div>
+                <ol class="text-xs text-slate-700 list-decimal ml-5 space-y-1 mb-3">
+                    <li>Obtain the tidal stage for each image series' capture time (gauge preferred; model noted as such).</li>
+                    <li>Obtain or assume the local beach/shore slope (assumption recorded, default <strong>assume and state</strong>).</li>
+                    <li>Compute the shore-normal horizontal offset (stage − reference) ❯ slope-deferred distance.</li>
+                    <li>Apply the offset to the digitised waterline, returning every shoreline to one shared reference stage.</li>
+                    <li><strong>Only then</strong> extract positions, build transects, and compute change statistics.</li>
+                </ol>
+                <div class="p-2.5 bg-sky-50 border-l-4 border-sky-500 rounded text-xs text-sky-900">
+                    <strong class="font-semibold">Order is not optional:</strong> the correction happens <em>before</em> change statistics (QSCAT/Diff/EPR), never after — statistics take shorelines as input and cannot repair them. Two rules: <em>a correction to an unstated reference stage is not a correction</em>; and <em>a correction applied but not recorded cannot be checked, reproduced, or reversed</em>. The reference stage (MSL, LAT, or a local datum) and the applied offset go into the dataset metadata with the dates.
+                </div>
+            </div>
+
+            <!-- Shoreline-change indicators card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-indigo-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#128207; Shoreline-Change Indicators — from rates to a hazard statement</span>
+                    <span class="text-xs bg-indigo-100 text-indigo-800 font-mono px-2 py-0.5 rounded">Day 1 · S6 → Day 3 · S1</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-2 text-[11px] mb-3">
+                    <div class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <strong class="text-indigo-900 block">SCE</strong>
+                        <span class="text-indigo-900/70">Shoreline Change Envelope — the full spread between all shorelines.</span>
+                    </div>
+                    <div class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <strong class="text-indigo-900 block">NSM</strong>
+                        <span class="text-indigo-900/70">Net Shoreline Movement — start-to-end distance across the whole record.</span>
+                    </div>
+                    <div class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <strong class="text-indigo-900 block">EPR</strong>
+                        <span class="text-indigo-900/70">End-Point Rate — NSM ÷ elapsed years; ignores every intermediate shoreline.</span>
+                    </div>
+                    <div class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <strong class="text-indigo-900 block">LRR</strong>
+                        <span class="text-indigo-900/70">Linear Regression Rate — fit through all shorelines; the robust default.</span>
+                    </div>
+                    <div class="p-2.5 bg-indigo-50 rounded-lg border border-indigo-100">
+                        <strong class="text-indigo-900 block">WLR</strong>
+                        <span class="text-indigo-900/70">Weighted LRR — older or lower-quality shorelines weighted down.</span>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    Tool: <strong class="text-slate-900">DSAS</strong> (USGS Digital Shoreline Analysis System) — casts transects at a chosen spacing normal to a baseline and returns the indicators above per transect. A shoreline set already exists for South Tarawa from the training record; the indicators are the upgrade from "a set of lines" to "a measurable series."
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5">A rate does not contain</div>
+                        <ul class="text-[11px] text-slate-700 space-y-1 list-disc ml-4 leading-relaxed">
+                            <li>the tidal stage of each capture (item above);</li>
+                            <li>the shared vertical datum of all shorelines;</li>
+                            <li>which future water level is being considered; and</li>
+                            <li>what sits behind the shoreline (the assets at risk).</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5">Translation needed</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">
+                            "The shoreline is retreating 0.9 m/yr" is a <em>measurement of the past</em>. "This area is at risk" is a <em>claim about the future that carries consequences</em>. Renaming one as the other is how erosion statements leak beyond their evidence. The rate is the simplest part of the chain — say which water level, which datum, and what is being measured against.
+                        </p>
+                    </div>
+                </div>
+                <div class="p-2.5 bg-indigo-50 border-l-4 border-indigo-500 rounded text-xs text-indigo-900">
+                    <strong class="font-semibold">Go further with Day 1 §"change today" exercises:</strong> between the two training dates under IKO-flood exposure the system recorded measurable shoreline change — re-run it as a <em>workflow</em> (same image, same stage, same transects, same statistics) so the output is a repeatable division product, not a one-off map.
                 </div>
             </div>
 
@@ -1433,6 +1615,44 @@
                             <strong class="text-amber-800">HEC-RAS / Delft3D-FM</strong> — the step up to dynamic modelling. Requires nearshore bathymetry and water levels the screening does not need; plan this as its own survey (side-scan/multibeam or RTK depth-profile) before promising a model deliverable. <span class="flag-p">provisional · scope-dependent</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- Risk-zoning card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-purple-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#127919; Risk Zoning — hazard &#215; exposure &#215; sensitivity</span>
+                    <span class="text-xs bg-purple-100 text-purple-800 font-mono px-2 py-0.5 rounded">Day 3 · S2 planning brief</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    The hazard layer tells a planner <em>where water goes</em>; the zoning layer tells them <em>where a development application should attract scrutiny</em>. Keep hazard and exposure as <strong class="text-slate-900">separate layers</strong> — separation is what lets each be revised independently (a new building is an exposure edit; a new DEM is a hazard edit) — then combine into a zoning product.
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs mb-3">
+                    <div class="p-3 bg-red-50 rounded-lg border border-red-200">
+                        <div class="text-[10px] uppercase tracking-wider text-red-500 font-semibold mb-1">Hazard (the water)</div>
+                        <p class="text-[11px] text-red-900/80 leading-relaxed">Bathtub screening levels (T1/T2/T3), storm-surge cells, projected SLR layers — the inundation outputs from this tab.</p>
+                    </div>
+                    <div class="p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <div class="text-[10px] uppercase tracking-wider text-amber-600 font-semibold mb-1">Exposure (what is there)</div>
+                        <p class="text-[11px] text-amber-900/80 leading-relaxed"><strong>HOTOSM buildings</strong> (finest-grained; crowd-derived &mdash; a working layer, <em>not</em> a cadastre; completeness uneven on outer islands &mdash; say so when counting), <strong>PopGIS3</strong> population, <strong>admin boundaries</strong> as the reporting frame, and <strong>wells / groundwater lens</strong> &mdash; the on-atoll resource inundation threatens most directly, mapped as explicit exposure.</p>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                        <div class="text-[10px] uppercase tracking-wider text-emerald-600 font-semibold mb-1">Sensitivity (how bad)</div>
+                        <p class="text-[11px] text-emerald-900/80 leading-relaxed">A clinic and a water lens are not equal to a vacant plot, nor a sole-access road to a road with an alternative. Assign the sensitivity once, in the layer's metadata, so the weights are visible.</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Combine</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">Simple rule-based classification or weighted overlay of the three inputs. Output <strong class="text-slate-900">exactly three classes</strong> (higher / moderate / lower), never more: a five-class zone implies a discrimination the underlying data cannot support. Keep each input as its own field and the weights/rules in metadata &mdash; <em>do not hide the inputs inside one composite number.</em></p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Proportionate</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">Structured combination for the planning brief, not a modelling exercise. Where a zoning layer must feed investment decisions, the audit trail is the deliverable: which hazard level, which exposure layer version, which weights, which date.</p>
+                    </div>
+                </div>
+                <div class="p-2.5 bg-purple-50 border-l-4 border-purple-500 rounded text-xs text-purple-900">
+                    <strong class="font-semibold">Rule:</strong> hazard and exposure are never merged before distribution, and the zoning product always names its three inputs. A zone is a decision-support statement with an expiry date, not a fact about the ground.
                 </div>
             </div>
 
