@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Chosen Palette: Warm Pacific Neutral (Background: #f8f6f0, Primary Slate: #1e293b, Coastal Teal: #0f766e, Warm Coral/Amber Accent: #d97706, Card White: #ffffff) -->
+    <!-- Application Structure Plan: Designed as a 5-tab Interactive Operations Hub prioritizing thematic exploration over linear document scrolling. 
+         Tab 1: Geodesy & Datums (3-Zone problem, legacy transformations, EGM2008 gravimetric tilt explainer).
+         Tab 2: Vertical Reference & Outer Islands (Betio TGZ tidal stack, dynamic VLM/SLR calculator, outer-island TBM protocol).
+         Tab 3: Drone LiDAR SOP & Flight Calc (M300/Zenmuse L1 flight calculator, base station SOP, GCP/CP stratification).
+         Tab 4: Processing & ASPRS QA/QC (CSF filter simulator, depression breaching vs taro pit preservation, interactive ASPRS accuracy evaluator).
+         Tab 5: Governance & Sovereign Licensing (OGC GeoPackage standards, ISO 19115-1 metadata profiling, Tier 1-4 commercial calculator, 5 verification gates). -->
+    <!-- Visualization & Content Choices: 
+         - EGM2008 vs Local Geoid Tilt: Line Chart (Chart.js) illustrating the 400mm gravimetric error across Tarawa atoll.
+         - Tidal Datum Plane Stack: Stacked/Grouped Bar Graphic & Map Algebra Dynamic Calculator (HTML/JS + Chart.js).
+         - Flight Altitude vs Resolution: Real-time JS Calculator (GSD, Pulse Density, ASPRS Compliance).
+         - ASPRS QA/QC Evaluator: Dynamic JS Math Engine computing NVA (1.96 * RMSEz), VVA (95th percentile), and Pass/Fail status.
+         - Sovereign Commercial Royalty Estimator: Interactive Tier & Area Fee Calculator ($ AUD).
+         - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. All visual icons utilize Unicode characters or HTML/CSS styling. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kiribati Geomatics SOP & Data Governance Hub | MFOR-GSD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8f6f0;
+            color: #1e293b;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .tab-btn.active {
+            background-color: #0f766e;
+            color: #ffffff;
+            border-color: #0f766e;
+            box-shadow: 0 4px 6px -1px rgba(15, 118, 110, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <!-- Header Section -->
+    <header class="bg-slate-900 text-white shadow-lg border-b border-teal-600">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex flex-col md:flex-row justify-between items-start md:items-center space-y-4 md:space-y-0">
+            <div>
+                <div class="flex items-center space-x-3">
+                    <span class="text-3xl" aria-hidden="true">&#127757;</span>
+                    <div>
+                        <h1 class="text-xl md:text-2xl font-bold tracking-tight text-white">Republic of Kiribati MFOR-GSD</h1>
+                        <p class="text-xs md:text-sm text-teal-300 font-medium">National Geomatics Onboarding Manual & SOP Operations Hub</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="bg-teal-900/80 text-teal-200 px-3 py-1.5 rounded-full border border-teal-700/50 font-mono">&#128205; Primary Reference: KIR 1 (+3.5334m TGZ)</span>
+                <span class="bg-amber-900/80 text-amber-200 px-3 py-1.5 rounded-full border border-amber-700/50 font-mono">&#9888;&#65039; ASPRS 5cm Vertical Class</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Introductory Banner -->
+    <section class="bg-teal-800 text-teal-50 border-b border-teal-900">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 text-xs sm:text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <p class="leading-relaxed">
+                <strong class="font-semibold text-white">Geoscience & Geodetic Surveying Division Mandate:</strong> Authoritative technical protocols for high-precision coastal UAV LiDAR, geodetic control, vertical datum standardization, and CARE Indigenous Data Sovereignty across 33 low-lying atolls.
+            </p>
+            <div class="shrink-0 font-mono text-xs bg-teal-950/60 px-2.5 py-1 rounded text-teal-200 border border-teal-700/40">
+                ITRF2020 @ Epoch 2026.83
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Navigation Bar -->
+    <nav class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex space-x-1 sm:space-x-2 overflow-x-auto py-2 custom-scrollbar" id="nav-tabs">
+                <button onclick="switchTab('geodesy')" id="tab-geodesy" class="tab-btn active px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium border border-transparent whitespace-nowrap transition-all flex items-center space-x-2">
+                    <span>&#127758;</span>
+                    <span>1. Geodesy & Datums</span>
+                </button>
+                <button onclick="switchTab('vertical')" id="tab-vertical" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium border border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap transition-all flex items-center space-x-2">
+                    <span>&#128207;</span>
+                    <span>2. Vertical Datum & TBM</span>
+                </button>
+                <button onclick="switchTab('uav')" id="tab-uav" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium border border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap transition-all flex items-center space-x-2">
+                    <span>&#128769;</span>
+                    <span>3. Drone LiDAR SOP</span>
+                </button>
+                <button onclick="switchTab('processing')" id="tab-processing" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium border border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap transition-all flex items-center space-x-2">
+                    <span>&#128187;</span>
+                    <span>4. Processing & ASPRS QA/QC</span>
+                </button>
+                <button onclick="switchTab('governance')" id="tab-governance" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm font-medium border border-transparent text-slate-600 hover:text-slate-900 hover:bg-slate-100 whitespace-nowrap transition-all flex items-center space-x-2">
+                    <span>&#128737;</span>
+                    <span>5. Governance & Licensing</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <!-- ========================================================================= -->
+        <!-- TAB 1: GEODESY & DATUMS -->
+        <!-- ========================================================================= -->
+        <div id="content-geodesy" class="space-y-6">
+            
+            <!-- Section Intro -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span class="text-teal-700">&#127758;</span>
+                    <span>Theoretical & Practical Geodesy in Multi-Hemisphere Atoll Environments</span>
+                </h2>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    The Republic of Kiribati encompasses 33 islands dispersed across 3.44 million km² of ocean, straddling both the Equator and the 180° meridian. This creates "The Three-Zone Problem"—spatial fragmentation across the Northern and Southern Hemispheres, Eastern/Western Longitudes, and non-contiguous UTM zones. The MFOR-GSD Spatial Reference Rule enforces master unprojected storage in WGS 84 (<code class="bg-slate-100 px-1.5 py-0.5 rounded text-teal-800 font-mono text-xs">EPSG:4326</code>/<code class="bg-slate-100 px-1.5 py-0.5 rounded text-teal-800 font-mono text-xs">4327</code>) combined with on-demand projection into native UTM zones during metric analysis.
+                </p>
+            </div>
+
+            <!-- Archipelagic Spatial Reference Matrix -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Zone Architecture Table -->
+                <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
+                        <span>Archipelagic CRS & UTM Zone Matrix</span>
+                        <span class="text-xs font-normal text-slate-500">Master Rule: Single CRS per island subset</span>
+                    </h3>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+                                    <th class="p-2.5">Sub-Region / Islands</th>
+                                    <th class="p-2.5">Longitude / Span</th>
+                                    <th class="p-2.5">Native Projected CRS</th>
+                                    <th class="p-2.5">EPSG</th>
+                                    <th class="p-2.5">Central Meridian (&lambda;<sub>0</sub>)</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 text-slate-600">
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-medium text-slate-900">Master National Archive</td>
+                                    <td class="p-2.5">169° E to 149° W</td>
+                                    <td class="p-2.5 font-mono text-teal-700">WGS 84 Geographic 2D/3D</td>
+                                    <td class="p-2.5 font-mono">4326 / 4327</td>
+                                    <td class="p-2.5">0° 00' E (Greenwich)</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50 bg-teal-50/30">
+                                    <td class="p-2.5 font-medium text-slate-900">West Gilbert (Tarawa, Abaiang)</td>
+                                    <td class="p-2.5">168° E to 174° E (North)</td>
+                                    <td class="p-2.5 font-mono text-slate-800">WGS 84 / UTM Zone 59N</td>
+                                    <td class="p-2.5 font-mono text-teal-800 font-semibold">32659</td>
+                                    <td class="p-2.5">171° 00' E</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-medium text-slate-900">East Gilbert (Equatorial North)</td>
+                                    <td class="p-2.5">174° E to 180° E (North)</td>
+                                    <td class="p-2.5 font-mono text-slate-800">WGS 84 / UTM Zone 60N</td>
+                                    <td class="p-2.5 font-mono text-teal-800 font-semibold">32660</td>
+                                    <td class="p-2.5">177° 00' E</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-medium text-slate-900">Southern Gilbert (Nonouti, Beru)</td>
+                                    <td class="p-2.5">174° E to 180° E (South)</td>
+                                    <td class="p-2.5 font-mono text-slate-800">WGS 84 / UTM Zone 60S</td>
+                                    <td class="p-2.5 font-mono text-teal-800 font-semibold">32760</td>
+                                    <td class="p-2.5">177° 00' E</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-medium text-slate-900">Phoenix Group (Kanton)</td>
+                                    <td class="p-2.5">174° W to 168° W (South)</td>
+                                    <td class="p-2.5 font-mono text-slate-800">WGS 84 / UTM Zone 2S</td>
+                                    <td class="p-2.5 font-mono text-teal-800 font-semibold">32702</td>
+                                    <td class="p-2.5">171° 00' W</td>
+                                </tr>
+                                <tr class="hover:bg-slate-50">
+                                    <td class="p-2.5 font-medium text-slate-900">Line Group (Kiritimati)</td>
+                                    <td class="p-2.5">162° W to 156° W (North)</td>
+                                    <td class="p-2.5 font-mono text-slate-800">WGS 84 / UTM Zone 4N</td>
+                                    <td class="p-2.5 font-mono text-teal-800 font-semibold">32604</td>
+                                    <td class="p-2.5">159° 00' W</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Legacy Datum Inspector Tool -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center space-x-2">
+                            <span>&#128204;</span>
+                            <span>Legacy Island Datum Transformation Inspector</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">Select legacy astro datum (International 1924 Ellipsoid) to view Operation ANON 1984-85 Helmert transformation vectors to WGS 84.</p>
+                        
+                        <label for="legacy-datum-select" class="block text-xs font-semibold text-slate-700 mb-1">Legacy Island Datum:</label>
+                        <select id="legacy-datum-select" onchange="updateLegacyDatumInfo()" class="w-full text-xs bg-slate-50 border border-slate-300 rounded-lg p-2 focus:ring-2 focus:ring-teal-500 focus:border-teal-500 font-medium">
+                            <option value="tarawa">Tarawa Datum 1966 (Operation ANON)</option>
+                            <option value="abaiang">Abaiang Datum 1962 (Operation ANON)</option>
+                            <option value="nonouti">Nonouti Datum 1965 (Operation ANON)</option>
+                            <option value="abemama">Abemama Datum 1959 (Doppler)</option>
+                            <option value="makin">Little Makin Datum 1972 (Doppler)</option>
+                            <option value="tamana">Tamana Datum 1962 (Doppler)</option>
+                        </select>
+
+                        <div id="legacy-datum-output" class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs space-y-2 font-mono">
+                            <!-- Dynamic Content Inserted by JS -->
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-2.5 bg-amber-50 border border-amber-200 rounded-lg text-amber-900 text-xs">
+                        <strong>&#9888;&#65039; Dynamic Epoch Reduction:</strong> Pacific Plate translates NW at <strong>65-72 mm/yr</strong>. 5-yr uncompensated gap introduces <strong>&gt;33 cm shift</strong>. Coordinates must carry epoch tags and be reduced to ITRF2020 via <code class="bg-amber-100 px-1 rounded">KIRI</code> CORS vectors.
+                    </div>
+                </div>
+            </div>
+
+            <!-- EGM2008 Gravimetric Tilt Prohibition Section -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-5 space-y-3">
+                        <div class="inline-flex items-center space-x-2 bg-red-100 text-red-800 text-xs font-bold px-2.5 py-1 rounded-full border border-red-200">
+                            <span>&#10007; STRICTLY PROHIBITED</span>
+                            <span>Unadjusted EGM2008 Conversions</span>
+                        </div>
+                        <h3 class="text-base font-bold text-slate-900">The 400mm EGM2008 Gravimetric Tilt Artifact</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Global geopotential models (<code class="bg-slate-100 px-1 rounded">EGM2008</code>) exhibit an unmodeled <strong>~400 mm (0.40 m) gravimetric tilt</strong> across Tarawa. Because natural terrain elevation rarely exceeds 3.0 m, applying EGM2008 introduces a <strong>13.3% vertical full-scale error</strong>, artificially submerging whole villages on one end while elevating vulnerable causeways on the other.
+                        </p>
+                        <div class="p-3 bg-slate-50 border-l-4 border-teal-600 rounded text-xs text-slate-700 space-y-1">
+                            <strong class="font-semibold text-slate-900">Physical Cause:</strong> Steep basaltic volcanic seamounts (&rho; &approx; 2.9 g/cm³) rising 4,000m from abyssal ocean water (&rho; &approx; 1.03 g/cm³) create extreme gravity gradients truncated at degree/order 2160 in satellite altimetry.
+                        </div>
+                    </div>
+
+                    <!-- Chart Container -->
+                    <div class="lg:col-span-7">
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200">
+                            <h4 class="text-xs font-bold text-slate-700 uppercase mb-2 text-center">Tarawa West-to-East Elevation Profile: Local Datum vs. EGM2008 Tilt</h4>
+                            <div class="chart-container">
+                                <canvas id="egmTiltChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 2: VERTICAL DATUM & OUTER-ISLAND CONTROL -->
+        <!-- ========================================================================= -->
+        <div id="content-vertical" class="hidden space-y-6">
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span class="text-teal-700">&#128207;</span>
+                    <span>National Vertical Reference Frame (Betio TGZ) & Outer-Island TBM SOP</span>
+                </h2>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    All coastal topographic and bathymetric elevations are standardized to <strong>Betio Tide Gauge Zero (TGZ)</strong>, anchored by Primary Benchmark <code class="bg-slate-100 px-1.5 py-0.5 rounded text-teal-800 font-mono text-xs">KIR 1</code> (+3.5334 m TGZ). Direct ellipsoidal-to-orthometric raster conversions utilize a single scalar vertical translation parameter <code class="bg-slate-100 px-1.5 py-0.5 rounded font-mono text-xs">&Delta;Z = Z<sub>KIR1, TGZ</sub> - z<sub>KIR1, Ellipsoid</sub></code> to preserve raw RTK/PPK surface slope free of global geoid tilt.
+                </p>
+            </div>
+
+            <!-- Tidal Planes & Map Algebra Simulator -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Tidal Datum Stack Visualizer -->
+                <div class="lg:col-span-6 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center justify-between">
+                        <span>Betio Tidal Datum Plane Hierarchy</span>
+                        <span class="text-xs font-mono text-teal-700">19-Year Nodal Epoch Calibration</span>
+                    </h3>
+                    <div class="space-y-3">
+                        <!-- Benchmark KIR 1 -->
+                        <div class="p-3 bg-slate-900 text-white rounded-lg flex justify-between items-center shadow-sm">
+                            <div>
+                                <span class="font-bold text-xs bg-teal-500 text-slate-950 px-2 py-0.5 rounded mr-2 font-mono">KIR 1</span>
+                                <span class="text-xs font-semibold">Primary Geodetic Benchmark</span>
+                            </div>
+                            <div class="text-right font-mono">
+                                <div class="text-sm font-bold text-teal-300">+3.5334 m TGZ</div>
+                                <div class="text-[10px] text-slate-300">+1.8404 m MSL</div>
+                            </div>
+                        </div>
+
+                        <!-- HAT -->
+                        <div class="p-3 bg-red-50 border border-red-200 rounded-lg flex justify-between items-center text-xs">
+                            <div>
+                                <strong class="text-red-900">Highest Astronomical Tide (HAT)</strong>
+                                <p class="text-[11px] text-red-700">King tide inundation baseline</p>
+                            </div>
+                            <div class="text-right font-mono font-bold text-red-900">
+                                +2.9780 m TGZ
+                            </div>
+                        </div>
+
+                        <!-- MSL -->
+                        <div class="p-3 bg-teal-50 border border-teal-200 rounded-lg flex justify-between items-center text-xs">
+                            <div>
+                                <strong class="text-teal-950">Mean Sea Level (MSL)</strong>
+                                <p class="text-[11px] text-teal-800">Civil engineering & DTM baseline</p>
+                            </div>
+                            <div class="text-right font-mono font-bold text-teal-950">
+                                +1.6930 m TGZ (0.000m MSL)
+                            </div>
+                        </div>
+
+                        <!-- LAT / CD -->
+                        <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg flex justify-between items-center text-xs">
+                            <div>
+                                <strong class="text-blue-900">Lowest Astronomical Tide (LAT / CD)</strong>
+                                <p class="text-[11px] text-blue-700">Chart datum & UAV low-tide window</p>
+                            </div>
+                            <div class="text-right font-mono font-bold text-blue-900">
+                                +0.5000 m TGZ
+                            </div>
+                        </div>
+
+                        <!-- TGZ -->
+                        <div class="p-2.5 bg-slate-100 border border-slate-300 rounded-lg flex justify-between items-center text-xs text-slate-600 font-mono">
+                            <span>Tide Gauge Zero (TGZ) Instrumental Origin</span>
+                            <span>0.0000 m TGZ</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-3 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-600 space-y-1">
+                        <strong class="text-slate-900 font-semibold">&#128200; Vertical Land Movement (VLM):</strong> Continuous GNSS tracking at Betio indicates vertical subsidence of <strong>-3.4 &plusmn; 2.8 mm/yr</strong>. VLM-corrected absolute oceanic sea level rise rate is <strong>+2.1 mm/yr</strong> (+80 mm cumulative by 2040).
+                    </div>
+                </div>
+
+                <!-- Interactive Delta Z & Raster Map Algebra Calculator -->
+                <div class="lg:col-span-6 bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center space-x-2">
+                            <span>&#128224;</span>
+                            <span>Interactive Ellipsoidal-to-TGZ Raster Shift Calculator</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">Input measured ellipsoidal height at KIR 1 to derive scalar vertical shift (&Delta;Z) and execute automated QGIS raster map algebra.</p>
+
+                        <div class="space-y-4 text-xs">
+                            <div>
+                                <label for="ellipsoid-z-input" class="block font-semibold text-slate-700 mb-1">Measured KIR 1 Ellipsoidal Height z<sub>KIR1, Ellipsoid</sub> (meters):</label>
+                                <input type="number" id="ellipsoid-z-input" value="28.500" step="0.001" oninput="calculateRasterShift()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-lg font-mono text-xs focus:ring-2 focus:ring-teal-500">
+                            </div>
+
+                            <div class="p-3 bg-teal-900 text-white rounded-lg font-mono space-y-1.5">
+                                <div class="text-[11px] text-teal-300">Computed Delta Z Translation Parameter:</div>
+                                <div class="text-lg font-bold text-teal-200" id="delta-z-output">&Delta;Z = -24.966 m</div>
+                            </div>
+
+                            <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg space-y-2">
+                                <div class="font-bold text-slate-800 uppercase text-[11px]">Dynamic QGIS Raster Calculator Formulas:</div>
+                                <div class="font-mono text-[11px] bg-white p-2 rounded border border-slate-200 text-teal-900 space-y-1">
+                                    <p id="formula-tgz">H_TGZ = h_Ellipsoid + (-24.966)</p>
+                                    <p id="formula-msl">H_MSL = H_TGZ - 1.6930</p>
+                                    <p id="formula-king">Risk_HAT = max(0, 2.9780 - H_TGZ)</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-2.5 bg-teal-50 border border-teal-200 rounded-lg text-teal-900 text-xs">
+                        <strong>Rule:</strong> Single scalar shift &Delta;Z applies strictly across localized UAV flight blocks (&le; 3 km). For corridors &gt; 5 km, linear interpolation between leveled benchmarks is required.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Outer-Island TBM Protocol Stepper -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-4 flex items-center space-x-2">
+                    <span>&#128034;</span>
+                    <span>Outer-Island Temporary Benchmark (TBM) 4-Stage Protocol</span>
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="w-6 h-6 rounded-full bg-teal-700 text-white font-bold flex items-center justify-center mb-2 text-xs">1</div>
+                            <strong class="text-slate-900 block font-semibold mb-1">Monumentation</strong>
+                            <p class="text-slate-600 leading-relaxed">16mm x 150mm 316 stainless pin epoxied into intertidal beachrock (<em>te ba</em>) or 1.5m rod in 1.0m deep concrete frustum. 24-hr cure time mandatory.</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded font-mono text-slate-700 self-start">Beachrock / Concrete</span>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="w-6 h-6 rounded-full bg-teal-700 text-white font-bold flex items-center justify-center mb-2 text-xs">2</div>
+                            <strong class="text-slate-900 block font-semibold mb-1">Static GNSS Session</strong>
+                            <p class="text-slate-600 leading-relaxed">4.0 hrs minimum continuous occupation (&lt;150km from Tarawa) or 6.0-8.0 hrs (&gt;150km). Logging at 1-5s across GPS/GLO/GAL/BDS with 10° elevation mask.</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded font-mono text-slate-700 self-start">Dual-Freq Multi-Const</span>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="w-6 h-6 rounded-full bg-teal-700 text-white font-bold flex items-center justify-center mb-2 text-xs">3</div>
+                            <strong class="text-slate-900 block font-semibold mb-1">Dual Post-Processing</strong>
+                            <p class="text-slate-600 leading-relaxed">AUSPOS (tied to KIRI, FUNA, MAJU) vs. NRCan CSRS-PPP (Static ITRF2020). Inter-engine agreement must be &le; 10mm horizontal / &le; 15mm vertical.</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded font-mono text-slate-700 self-start">AUSPOS + CSRS-PPP</span>
+                    </div>
+
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between space-y-2">
+                        <div>
+                            <div class="w-6 h-6 rounded-full bg-teal-700 text-white font-bold flex items-center justify-center mb-2 text-xs">4</div>
+                            <strong class="text-slate-900 block font-semibold mb-1">Tidal Datum Transfer</strong>
+                            <p class="text-slate-600 leading-relaxed">Dual pressure transducers in stilling pipe (7 to 30 continuous days) + barologger + closed optical leveling loop (&le; 2&radic;K mm). Modified range-ratio tie to Betio/Kiritimati.</p>
+                        </div>
+                        <span class="text-[10px] bg-slate-200 px-2 py-0.5 rounded font-mono text-slate-700 self-start">Hydrostatic Transfer</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 3: DRONE LIDAR SOP & FLIGHT CALC -->
+        <!-- ========================================================================= -->
+        <div id="content-uav" class="hidden space-y-6">
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span class="text-teal-700">&#128769;</span>
+                    <span>Drone LiDAR & High-Resolution RTK/PPK Photogrammetry SOP</span>
+                </h2>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    Airborne data collection is standardized around the <strong>DJI Matrice 300 RTK</strong> carrying the <strong>Zenmuse L1 payload</strong> (Livox Avia LiDAR + 20MP RGB camera) and D-RTK 2 base station. Strict adherence to base station manual coordinate entry and acquisition parameters is mandatory to achieve ASPRS 5-cm vertical accuracy.
+                </p>
+            </div>
+
+            <!-- Base Station SOP Warning Card -->
+            <div class="bg-red-50 border-2 border-red-300 rounded-xl p-5 text-red-950 text-xs space-y-3">
+                <div class="flex items-center space-x-2 text-red-800 font-bold text-sm">
+                    <span class="text-lg">&#128680;</span>
+                    <span>MANDATORY PROTOCOL: D-RTK 2 Base Station Setup</span>
+                </div>
+                <p class="leading-relaxed">
+                    <strong>Autonomous single-point base station averaging is STRICTLY PROHIBITED.</strong> In equatorial ionospheric environments, single-point averaging introduces <strong>1.50m to 3.00m vertical shifts</strong>. Field operators MUST execute manual coordinate entry in DJI Pilot 2 before arming aircraft motors:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-[11px] bg-white p-3 rounded-lg border border-red-200 text-slate-800">
+                    <div>1. Plumb over benchmark KIR 1 or certified MFOR-TBM.</div>
+                    <div>2. Verify locking tripod APC height offset = <strong>1.8015 m</strong>.</div>
+                    <div>3. Enter certified benchmark lat/long to <strong>9 decimal places</strong>.</div>
+                </div>
+            </div>
+
+            <!-- Interactive Flight Calculator & Overlap Matrix -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Flight Parameter Interactive Calculator -->
+                <div class="lg:col-span-7 bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                            <span>Interactive Mission Parameter Calculator</span>
+                            <span class="text-xs text-teal-700 font-mono">Zenmuse L1 / M300 RTK</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">Adjust flight altitude above ground level (AGL) to evaluate computed RGB Ground Sampling Distance (GSD) and LiDAR point density.</p>
+
+                        <div class="space-y-4 text-xs">
+                            <div>
+                                <div class="flex justify-between font-semibold text-slate-700 mb-1">
+                                    <label for="altitude-slider">Flight Altitude (AGL):</label>
+                                    <span id="altitude-val" class="font-mono text-teal-700 font-bold">60 meters</span>
+                                </div>
+                                <input type="range" id="altitude-slider" min="40" max="100" value="60" step="1" oninput="updateFlightCalc()" class="w-full accent-teal-600">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between font-semibold text-slate-700 mb-1">
+                                    <label for="speed-slider">Flight Speed:</label>
+                                    <span id="speed-val" class="font-mono text-teal-700 font-bold">7.0 m/s</span>
+                                </div>
+                                <input type="range" id="speed-slider" min="5.0" max="10.0" value="7.0" step="0.5" oninput="updateFlightCalc()" class="w-full accent-teal-600">
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 pt-2">
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                                    <span class="text-[10px] text-slate-500 uppercase block font-semibold">Expected RGB GSD</span>
+                                    <span id="gsd-output" class="text-base font-bold text-slate-900 font-mono">1.64 cm/px</span>
+                                </div>
+                                <div class="p-3 bg-slate-50 border border-slate-200 rounded-lg text-center">
+                                    <span class="text-[10px] text-slate-500 uppercase block font-semibold">LiDAR Pulse Density</span>
+                                    <span id="density-output" class="text-base font-bold text-teal-800 font-mono">245 pts/m²</span>
+                                </div>
+                            </div>
+
+                            <div id="asprs-status-box" class="p-3 bg-teal-50 border border-teal-200 text-teal-900 rounded-lg font-medium text-xs">
+                                &#10003; Standard Compliant: Source GSD &le; 2.0 cm supports ASPRS 5-cm Target Vertical Accuracy Class.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 p-2 bg-slate-100 rounded text-[11px] text-slate-600 flex justify-between">
+                        <span><strong>Camera Pitch:</strong> 75°-80° Oblique</span>
+                        <span><strong>Scan Mode:</strong> Repetitive / Triple Return</span>
+                    </div>
+                </div>
+
+                <!-- GCP & Checkpoint Stratification Matrix -->
+                <div class="lg:col-span-5 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3">
+                        <span>Ground Target Deployment per 1.5km Block</span>
+                    </h3>
+                    
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                            <div class="flex justify-between items-center font-bold text-slate-900 mb-1">
+                                <span>Ground Control Points (GCPs)</span>
+                                <span class="bg-slate-200 px-2 py-0.5 rounded font-mono">5 - 8 Targets</span>
+                            </div>
+                            <p class="text-slate-600 text-[11px]">60x60cm high-contrast matte checkerboards in double-chain staggered "sawtooth" perimeter layout. Used <strong>exclusively</strong> for Bundle Block Adjustment calibration.</p>
+                        </div>
+
+                        <div class="p-3 bg-teal-50 rounded-lg border border-teal-200">
+                            <div class="flex justify-between items-center font-bold text-teal-950 mb-1">
+                                <span>Independent Checkpoints (CPs)</span>
+                                <span class="bg-teal-200 text-teal-900 px-2 py-0.5 rounded font-mono font-bold">10 - 15 Targets</span>
+                            </div>
+                            <p class="text-teal-800 text-[11px]">Strictly withheld from processing. Stratified across 4 atoll geomorphological zones for independent QA/QC verification:</p>
+                            
+                            <ul class="mt-2 space-y-1 text-[11px] text-teal-900 font-medium pl-2">
+                                <li>&bull; <strong>Stratum 1 (Reef Flat/Beachrock):</strong> 3-4 CPs (NVA)</li>
+                                <li>&bull; <strong>Stratum 2 (Beach Scarp/Seawall):</strong> 3-4 CPs (NVA)</li>
+                                <li>&bull; <strong>Stratum 3 (Berm Crest/Road):</strong> 2-3 CPs (NVA)</li>
+                                <li>&bull; <strong>Stratum 4 (Vegetation/Mangrove):</strong> 2-4 CPs (VVA)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 4: PROCESSING & ASPRS QA/QC -->
+        <!-- ========================================================================= -->
+        <div id="content-processing" class="hidden space-y-6">
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span class="text-teal-700">&#128187;</span>
+                    <span>Data Processing Pipeline, Hydro-Conditioning & ASPRS Accuracy Certification</span>
+                </h2>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    Raw LiDAR point clouds undergo strip alignment in DJI Terra Pro, bare-earth extraction via the <strong>Cloth Simulation Filter (CSF)</strong>, depression breaching for culverts, and marine hydro-flattening. Accuracy certification is governed by <strong>ASPRS 2023 Edition 2 Standards</strong> using independent Checkpoints.
+                </p>
+            </div>
+
+            <!-- CSF Parameters & Hydro-Conditioning Rules -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                <!-- Cloth Simulation Filter (CSF) Card -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center space-x-2">
+                        <span>&#129525;</span>
+                        <span>Cloth Simulation Filter (CSF) Mandatory Parameters</span>
+                    </h3>
+                    <p class="text-xs text-slate-600 mb-4">The 3D point cloud is inverted upside down; a simulated rigid cloth is dropped under gravity to filter dense coconut palms and mangrove roots while preserving carbonate terrain micro-relief.</p>
+
+                    <div class="space-y-2.5 text-xs font-mono">
+                        <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <span class="text-slate-700">cloth_resolution (Grid Resolution):</span>
+                            <span class="font-bold text-teal-800">1.0 m</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <span class="text-slate-700">rigidness (Cloth Stiffness):</span>
+                            <span class="font-bold text-teal-800">1 (Steep Slope / Scarp)</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <span class="text-slate-700">classification_threshold (h_cc):</span>
+                            <span class="font-bold text-teal-800">0.15 m</span>
+                        </div>
+                        <div class="p-2.5 bg-slate-50 rounded border border-slate-200 flex justify-between items-center">
+                            <span class="text-slate-700">iterations / time_step:</span>
+                            <span class="font-bold text-teal-800">500 / 0.65</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hydro-Conditioning Rules Card -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center space-x-2">
+                        <span>&#128167;</span>
+                        <span>Depression Breaching vs. Taro Pit Preservation</span>
+                    </h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="p-3 bg-amber-50 border border-amber-200 text-amber-950 rounded-lg">
+                            <strong>&#9888;&#65039; PROHIBITION: Standard "Fill Depressions" Banned</strong>
+                            <p class="mt-1 leading-relaxed">Global depression filling erases authentic <em>babai</em> (giant swamp taro) pits and borrow pits, destroying real flood storage capacity. Analysts must use <strong>Least-Cost Depression Breaching</strong> in WhiteboxTools (<code class="bg-amber-100 px-1 rounded font-mono">max_dist = 25.0m</code>) to cut only artificial causeway road blockages.</p>
+                        </div>
+                        <div class="p-3 bg-blue-50 border border-blue-200 text-blue-950 rounded-lg">
+                            <strong>Marine Hydro-Flattening:</strong>
+                            <p class="mt-1 leading-relaxed">Water-edge breakline polygons are digitized at low tide. Oceanward and lagoonward raster cells seaward of the breakline are burned to instantaneous water height (+0.500m TGZ) or NoData to guarantee flat hydrodynamic boundary conditions.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Interactive ASPRS QA/QC Accuracy Evaluator Tool -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#128203; Interactive ASPRS 2023 Quality Control Evaluator</span>
+                    <span class="text-xs text-teal-700 font-mono">ASPRS 5-cm Vertical Class 3 Target</span>
+                </h3>
+                <p class="text-xs text-slate-600 mb-4">Enter sample Checkpoint error statistics from field verification to test ASPRS Edition 2 compliance.</p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    
+                    <div class="lg:col-span-6 space-y-3 text-xs">
+                        <div>
+                            <label for="rmse-z-input" class="block font-semibold text-slate-700 mb-1">Non-Vegetated Vertical RMSE<sub>z</sub> (cm):</label>
+                            <input type="number" id="rmse-z-input" value="4.2" step="0.1" oninput="evaluateASPRS()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div>
+                            <label for="bias-z-input" class="block font-semibold text-slate-700 mb-1">Systematic Vertical Bias Mean Error (cm):</label>
+                            <input type="number" id="bias-z-input" value="0.8" step="0.1" oninput="evaluateASPRS()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-mono">
+                        </div>
+
+                        <div>
+                            <label for="vva-p95-input" class="block font-semibold text-slate-700 mb-1">Vegetated 95th Percentile Error (cm):</label>
+                            <input type="number" id="vva-p95-input" value="12.4" step="0.1" oninput="evaluateASPRS()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-mono">
+                        </div>
+                    </div>
+
+                    <div class="lg:col-span-6 bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3 text-xs">
+                        <div class="font-bold text-slate-900 uppercase border-b border-slate-200 pb-2">Compliance Evaluation Results:</div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span>Computed NVA 95% Confidence (1.96 &times; RMSE<sub>z</sub>):</span>
+                            <span id="nva-95-output" class="font-mono font-bold text-slate-900">8.23 cm</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span>NVA Threshold Limit (&le; 9.8 cm):</span>
+                            <span id="nva-status" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">PASS</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span>Systematic Bias Limit (&le; &plusmn;1.5 cm):</span>
+                            <span id="bias-status" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">PASS</span>
+                        </div>
+
+                        <div class="flex justify-between items-center">
+                            <span>VVA 95th Percentile Limit (&le; 14.7 cm):</span>
+                            <span id="vva-status" class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold">PASS</span>
+                        </div>
+
+                        <div id="overall-cert-box" class="p-3 bg-emerald-700 text-white rounded-lg text-center font-bold text-xs">
+                            &#10003; CERTIFIED: Satisfies ASPRS Edition 2 (2023) 5-cm Vertical Accuracy Class.
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================= -->
+        <!-- TAB 5: GOVERNANCE & LICENSING -->
+        <!-- ========================================================================= -->
+        <div id="content-governance" class="hidden space-y-6">
+            
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                    <span class="text-teal-700">&#128737;</span>
+                    <span>Spatial Data Governance, OGC Standards & Four-Tier Commercial Licensing</span>
+                </h2>
+                <p class="text-sm text-slate-600 mt-2 leading-relaxed">
+                    MFOR-GSD mandates the formal deprecation of ESRI Shapefiles in favor of <strong>OGC GeoPackage (<code class="bg-slate-100 px-1 rounded text-teal-800 font-mono">.gpkg</code>)</strong> and <strong>Cloud Optimized GeoTIFF (<code class="bg-slate-100 px-1 rounded text-teal-800 font-mono">.tif</code>/COG)</strong>. All products are governed by CARE Indigenous Data Sovereignty principles and metadata harvested via ISO 19115-1 XML to the Kiribati National Repository and SPC Pacific Data Hub.
+                </p>
+            </div>
+
+            <!-- OGC Format Deprecation Table -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span>Format Mandate: Legacy Shapefile Deprecation</span>
+                    <span class="text-xs bg-red-100 text-red-800 font-bold px-2.5 py-0.5 rounded">.SHP PROHIBITED</span>
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="p-4 bg-red-50/50 border border-red-200 rounded-xl space-y-2">
+                        <strong class="text-red-900 font-bold block text-sm">&#10007; Legacy Shapefile Vulnerabilities (.shp)</strong>
+                        <ul class="space-y-1 text-slate-700 text-[11px] list-disc pl-4">
+                            <li>10-character attribute header truncation mangles field names (<code class="bg-red-100 px-1">crest_elev_tgz_m</code> &rarr; <code class="bg-red-100 px-1">crest_el_1</code>).</li>
+                            <li>Multi-file sidecar fragmentation causes lost projection (<code class="bg-red-100 px-1">.prj</code>) files during island transfers.</li>
+                            <li>Strict 2 GB file size ceiling prevents storing atoll-wide building or shoreline vector tables.</li>
+                        </ul>
+                    </div>
+
+                    <div class="p-4 bg-teal-50/50 border border-teal-200 rounded-xl space-y-2">
+                        <strong class="text-teal-950 font-bold block text-sm">&#10003; Mandated OGC GeoPackage Standard (.gpkg)</strong>
+                        <ul class="space-y-1 text-slate-800 text-[11px] list-disc pl-4">
+                            <li>Single, self-contained SQLite3 database container supporting up to 140 TB.</li>
+                            <li>Full UTF-8 character encoding preserves native Gilbertese place names.</li>
+                            <li>Embedded spatial indexing (R*Tree), vector layer styles, and ISO metadata tables.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sovereign Commercial Licensing Calculator -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <div class="lg:col-span-7 bg-white rounded-xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center space-x-2">
+                            <span>&#9878;&#65039;</span>
+                            <span>Sovereign Data Licensing & Royalty Estimator</span>
+                        </h3>
+                        <p class="text-xs text-slate-600 mb-4">Select the applicant entity category and enter survey coverage area to calculate licensing fees ($ AUD) and legal mandates.</p>
+
+                        <div class="space-y-4 text-xs">
+                            <div>
+                                <label for="license-tier-select" class="block font-semibold text-slate-700 mb-1">Licensing Tier & Category:</label>
+                                <select id="license-tier-select" onchange="calculateLicensing()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-medium">
+                                    <option value="tier1">Tier 1: Sovereign Intra-Governmental & Community (0.00 AUD)</option>
+                                    <option value="tier2">Tier 2: Multilateral Development & Regional Partner (15% Levy)</option>
+                                    <option value="tier3">Tier 3: Academic & International Research (Levy + Co-authorship)</option>
+                                    <option value="tier4">Tier 4: Commercial Engineering & Reinsurance (2,500 AUD/km²)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="area-input" class="block font-semibold text-slate-700 mb-1">Coverage Area (km²):</label>
+                                    <input type="number" id="area-input" value="10" min="1" oninput="calculateLicensing()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-mono">
+                                </div>
+                                <div>
+                                    <label for="tasking-select" class="block font-semibold text-slate-700 mb-1">Tasking Type:</label>
+                                    <select id="tasking-select" onchange="calculateLicensing()" class="w-full p-2 bg-slate-50 border border-slate-300 rounded font-medium">
+                                        <option value="archival">Archival Database Extraction</option>
+                                        <option value="bespoke">Bespoke UAV Field Tasking</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="p-3 bg-slate-900 text-white rounded-lg font-mono space-y-1">
+                                <div class="text-[11px] text-teal-300">Estimated License Fee / Contribution:</div>
+                                <div class="text-lg font-bold text-teal-200" id="license-fee-output">$25,000.00 AUD</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="license-mandates-box" class="mt-4 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs space-y-1 text-slate-700">
+                        <!-- Dynamic Mandate Text Inserted by JS -->
+                    </div>
+                </div>
+
+                <!-- 5 Onboarding Verification Gates Checklist -->
+                <div class="lg:col-span-5 bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                    <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-3 flex items-center justify-between">
+                        <span>Onboarding Audit Verification Gates</span>
+                        <span class="text-xs text-teal-700 font-mono">Chief Geodetic Surveyor Sign-off</span>
+                    </h3>
+
+                    <div class="space-y-2 text-xs">
+                        <label class="flex items-start space-x-2 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+                            <span><strong>Gate 1: Geodesy Audit:</strong> Native UTM CRS used; legacy maps shifted via Operation ANON; zero EGM2008 conversions.</span>
+                        </label>
+
+                        <label class="flex items-start space-x-2 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+                            <span><strong>Gate 2: Datum Audit:</strong> D-RTK 2 manual benchmark entry verified; outer-island TBM AUSPOS vs CSRS-PPP &le; 15mm.</span>
+                        </label>
+
+                        <label class="flex items-start space-x-2 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+                            <span><strong>Gate 3: LiDAR/CSF Audit:</strong> Low tide flight (&plusmn;1.5 hr); CSF run at res=1.0m, rigid=1, thresh=0.15m; least-cost breaching applied.</span>
+                        </label>
+
+                        <label class="flex items-start space-x-2 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+                            <span><strong>Gate 4: OGC Governance:</strong> Zero .shp files; master vectors in .gpkg; ISO 19115-1 XML populated with CI_Responsibility.</span>
+                        </label>
+
+                        <label class="flex items-start space-x-2 p-2 bg-slate-50 rounded border border-slate-200 cursor-pointer hover:bg-slate-100">
+                            <input type="checkbox" checked class="mt-0.5 rounded text-teal-600 focus:ring-teal-500">
+                            <span><strong>Gate 5: ASPRS QA/QC:</strong> Independent CPs confirm RMSEz &le; 5.0cm, NVA &le; 9.8cm; signed SVR report archived.</span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 text-xs py-6 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+            <div>
+                <p class="font-semibold text-slate-300">Ministry of Fisheries and Ocean Resources (MFOR)</p>
+                <p class="text-[11px] text-slate-500">Geoscience and Geodetic Surveying Division &bull; Bairiki, Tarawa, Republic of Kiribati</p>
+            </div>
+            <div class="text-center md:text-right text-[11px] text-slate-500">
+                <p>Compliant with ASPRS Edition 2 (2023) & ISO 19115-1:2014 Metadata Standards</p>
+                <p>CARE Principles for Indigenous Data Governance Framework</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Tab Navigation State Logic
+        function switchTab(tabId) {
+            const tabs = ['geodesy', 'vertical', 'uav', 'processing', 'governance'];
+            tabs.forEach(id => {
+                const content = document.getElementById(`content-${id}`);
+                const tabBtn = document.getElementById(`tab-${id}`);
+                if (id === tabId) {
+                    content.classList.remove('hidden');
+                    tabBtn.classList.add('active');
+                    tabBtn.classList.remove('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+                } else {
+                    content.classList.add('hidden');
+                    tabBtn.classList.remove('active');
+                    tabBtn.classList.add('text-slate-600', 'hover:text-slate-900', 'hover:bg-slate-100');
+                }
+            });
+        }
+
+        // Legacy Datum Dictionary
+        const legacyDatums = {
+            tarawa: {
+                name: "Tarawa Datum 1966",
+                origin: "Tarawa SECOR AMS 1966 (01°21'42.13\"N, 172°55'47.27\"E)",
+                dx: "+184.0 m", dy: "-356.3 m", dz: "+287.5 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=173.033333 +k=1 +x_0=20000 +y_0=0 +ellps=intl +towgs84=184.0,-356.3,287.5,0,0,0,0 +units=m +no_defs"
+            },
+            abaiang: {
+                name: "Abaiang Datum 1962",
+                origin: "Flagstaff Govt Station / HMS Cook Astro H",
+                dx: "+254.3 m", dy: "-323.4 m", dz: "-275.6 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=172.916667 +k=1 +x_0=20000 +y_0=0 +ellps=intl +towgs84=254.3,-323.4,-275.6,0,0,0,0 +units=m +no_defs"
+            },
+            nonouti: {
+                name: "Nonouti Datum 1965",
+                origin: "Station NNZ 14 (00°39'57.70\"S, 174°26'52.14\"E)",
+                dx: "+221.2 m", dy: "-96.3 m", dz: "-935.1 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=174.333333 +k=1 +x_0=20000 +y_0=200000 +ellps=intl +towgs84=221.2,-96.3,-935.1,0,0,0,0 +units=m +no_defs"
+            },
+            abemama: {
+                name: "Abemama Datum 1959",
+                origin: "Cook Astro Point (00°24'19.02\"N, 173°55'36.57\"E)",
+                dx: "+289.4 m", dy: "+656.2 m", dz: "+303.4 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=173.9268 +k=1 +x_0=0 +y_0=0 +ellps=intl +towgs84=289.4,656.2,303.4,0,0,0,0 +units=m +no_defs"
+            },
+            makin: {
+                name: "Little Makin Datum 1972",
+                origin: "Station Bikati Astro",
+                dx: "+230.3 m", dy: "-17.7 m", dz: "-315.3 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=172.6767 +k=1 +x_0=0 +y_0=0 +ellps=intl +towgs84=230.3,-17.7,-315.3,0,0,0,0 +units=m +no_defs"
+            },
+            tamana: {
+                name: "Tamana Datum 1962",
+                origin: "Astro Observation Spot",
+                dx: "+140.1 m", dy: "+235.6 m", dz: "-377.2 m",
+                proj: "+proj=tmerc +lat_0=0 +lon_0=175.9794 +k=1 +x_0=0 +y_0=0 +ellps=intl +towgs84=140.1,235.6,-377.2,0,0,0,0 +units=m +no_defs"
+            }
+        };
+
+        function updateLegacyDatumInfo() {
+            const key = document.getElementById('legacy-datum-select').value;
+            const data = legacyDatums[key];
+            const container = document.getElementById('legacy-datum-output');
+            
+            container.innerHTML = `
+                <div><strong class="text-teal-900">${data.name}</strong></div>
+                <div class="text-[11px] text-slate-600">Origin: ${data.origin}</div>
+                <div class="text-[11px] text-teal-800 font-bold">Helmert Shift: &Delta;X = ${data.dx}, &Delta;Y = ${data.dy}, &Delta;Z = ${data.dz}</div>
+                <div class="text-[10px] text-slate-500 bg-white p-1.5 rounded border border-slate-200 text-ellipsis overflow-hidden">${data.proj}</div>
+            `;
+        }
+
+        // Initialize EGM2008 Tilt Chart
+        let egmChartInstance = null;
+        function initEGMTiltChart() {
+            const ctx = document.getElementById('egmTiltChart').getContext('2d');
+            
+            // Distances along Tarawa from Betio (0 km) to Bonriki (30 km)
+            const labels = ['0 km (Betio)', '5 km (Bairiki)', '10 km (Teaoraereke)', '15 km (Eita)', '20 km (Ambo)', '25 km (Bikenibeu)', '30 km (Bonriki)'];
+            
+            egmChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'True Physical Local Tidal Datum (Betio TGZ / MSL)',
+                            data: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                            borderColor: '#0f766e',
+                            backgroundColor: '#0f766e',
+                            borderWidth: 3,
+                            pointRadius: 4,
+                            fill: false
+                        },
+                        {
+                            label: 'EGM2008 Geoid Undulation Tilt Artifact',
+                            data: [0.00, 0.07, 0.14, 0.20, 0.27, 0.33, 0.40],
+                            borderColor: '#dc2626',
+                            backgroundColor: 'rgba(220, 38, 38, 0.1)',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            pointRadius: 4,
+                            fill: true
+                        },
+                        {
+                            label: 'Average Natural Sand Rim Elevation (m TGZ)',
+                            data: [2.10, 2.30, 1.95, 2.05, 2.20, 2.40, 2.80],
+                            borderColor: '#d97706',
+                            backgroundColor: '#d97706',
+                            borderWidth: 1.5,
+                            pointStyle: 'rectRot',
+                            pointRadius: 5,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 12,
+                                font: { size: 10 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)} m`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Vertical Offset / Elevation (m)',
+                                font: { size: 11, weight: 'bold' }
+                            },
+                            min: -0.1,
+                            max: 3.2
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: 10 }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Ellipsoidal to TGZ Raster Shift Calculation
+        function calculateRasterShift() {
+            const zInput = parseFloat(document.getElementById('ellipsoid-z-input').value) || 28.500;
+            const zKIR1_TGZ = 3.5334;
+            const deltaZ = zKIR1_TGZ - zInput;
+
+            document.getElementById('delta-z-output').innerHTML = `&Delta;Z = ${deltaZ.toFixed(3)} m`;
+            document.getElementById('formula-tgz').innerText = `H_TGZ = h_Ellipsoid + (${deltaZ.toFixed(3)})`;
+            document.getElementById('formula-msl').innerText = `H_MSL = H_TGZ - 1.6930`;
+            document.getElementById('formula-king').innerText = `Risk_HAT = max(0, 2.9780 - H_TGZ)`;
+        }
+
+        // Flight Parameter Calculator
+        function updateFlightCalc() {
+            const altitude = parseFloat(document.getElementById('altitude-slider').value);
+            const speed = parseFloat(document.getElementById('speed-slider').value);
+
+            document.getElementById('altitude-val').innerText = `${altitude} meters`;
+            document.getElementById('speed-val').innerText = `${speed.toFixed(1)} m/s`;
+
+            // Zenmuse L1 RGB Focal length = 8.8mm, pixel pitch = 2.41 um
+            // GSD = (Altitude * 100 * 0.000241) / 0.88
+            const gsd = (altitude * 100 * 0.000241) / 0.88;
+            
+            // LiDAR Pulse Density approx formula at triple return, 240kHz, 70.4 deg FOV
+            const swathWidth = 2 * altitude * Math.tan((70.4 / 2) * (Math.PI / 180));
+            const density = (240000 * 3) / (swathWidth * speed);
+
+            document.getElementById('gsd-output').innerText = `${gsd.toFixed(2)} cm/px`;
+            document.getElementById('density-output').innerText = `${Math.round(density)} pts/m²`;
+
+            const statusBox = document.getElementById('asprs-status-box');
+            if (gsd <= 2.0) {
+                statusBox.className = "p-3 bg-teal-50 border border-teal-200 text-teal-900 rounded-lg font-medium text-xs";
+                statusBox.innerHTML = `&#10003; <strong>Standard Compliant:</strong> Source GSD (${gsd.toFixed(2)} cm) &le; 2.0 cm threshold for ASPRS 5-cm Target Class. LiDAR density (${Math.round(density)} pts/m²) exceeds 180 pts/m² minimum.`;
+            } else {
+                statusBox.className = "p-3 bg-amber-50 border border-amber-200 text-amber-900 rounded-lg font-medium text-xs";
+                statusBox.innerHTML = `&#9888;&#65039; <strong>Warning:</strong> Altitude ${altitude}m yields GSD (${gsd.toFixed(2)} cm) &gt; 2.0 cm limit. Reduce altitude to &le; 73m to ensure ASPRS compliance.`;
+            }
+        }
+
+        // ASPRS Accuracy Evaluator
+        function evaluateASPRS() {
+            const rmseZ = parseFloat(document.getElementById('rmse-z-input').value) || 0;
+            const biasZ = parseFloat(document.getElementById('bias-z-input').value) || 0;
+            const vvaP95 = parseFloat(document.getElementById('vva-p95-input').value) || 0;
+
+            const nva95 = 1.9600 * rmseZ;
+            document.getElementById('nva-95-output').innerText = `${nva95.toFixed(2)} cm`;
+
+            const nvaPass = rmseZ <= 5.0 && nva95 <= 9.8;
+            const biasPass = Math.abs(biasZ) <= 1.5;
+            const vvaPass = vvaP95 <= 14.7;
+
+            updateBadge('nva-status', nvaPass);
+            updateBadge('bias-status', biasPass);
+            updateBadge('vva-status', vvaPass);
+
+            const certBox = document.getElementById('overall-cert-box');
+            if (nvaPass && biasPass && vvaPass) {
+                certBox.className = "p-3 bg-emerald-700 text-white rounded-lg text-center font-bold text-xs";
+                certBox.innerHTML = "&#10003; CERTIFIED: Satisfies ASPRS Edition 2 (2023) 5-cm Vertical Accuracy Class.";
+            } else {
+                certBox.className = "p-3 bg-red-700 text-white rounded-lg text-center font-bold text-xs";
+                certBox.innerHTML = "&#10007; REJECTED: Violates ASPRS 5-cm Accuracy Limits. Audit D-RTK 2 setup & BBA points.";
+            }
+        }
+
+        function updateBadge(id, isPass) {
+            const el = document.getElementById(id);
+            if (isPass) {
+                el.className = "bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold";
+                el.innerText = "PASS";
+            } else {
+                el.className = "bg-red-100 text-red-800 px-2 py-0.5 rounded font-bold";
+                el.innerText = "FAIL";
+            }
+        }
+
+        // Commercial Licensing Calculator
+        function calculateLicensing() {
+            const tier = document.getElementById('license-tier-select').value;
+            const area = parseFloat(document.getElementById('area-input').value) || 1;
+            const tasking = document.getElementById('tasking-select').value;
+
+            let fee = 0;
+            let mandateText = "";
+
+            if (tier === 'tier1') {
+                fee = 0;
+                mandateText = "<strong>Tier 1 Mandate:</strong> Sovereign Intra-Governmental License. 0.00 AUD. Unrestricted GoK ministry access. Citation of MFOR-GSD required on all outputs. Third-party forwarding prohibited.";
+            } else if (tier === 'tier2') {
+                fee = area * 350; // Project cost recovery levy
+                mandateText = "<strong>Tier 2 Mandate:</strong> Multilateral Partner License (World Bank/ADB/SPC). Mandatory Data Repatriation Clause: All derivative CAD, hydrodynamic models, and bathymetry must be returned to MFOR-GSD in OGC GeoPackage format within 30 days.";
+            } else if (tier === 'tier3') {
+                fee = Math.max(1500, area * 200);
+                mandateText = "<strong>Tier 3 Mandate:</strong> Academic Research License. At least one MFOR-GSD geoscientist must be included as a co-author on all peer-reviewed publications. Direct raw point cloud uploads to OpenTopography/Zenodo are prohibited.";
+            } else if (tier === 'tier4') {
+                const rate = (tasking === 'bespoke') ? 6500 : 2500;
+                fee = area * rate;
+                mandateText = `<strong>Tier 4 Mandate:</strong> Commercial Engineering & Reinsurance License (${rate} AUD/km²). Non-transferable single-project license. Sovereign IP remains permanently with GoK. 5% revenue share on derivative blue-carbon credits.`;
+            }
+
+            document.getElementById('license-fee-output').innerText = `$${fee.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})} AUD`;
+            document.getElementById('license-mandates-box').innerHTML = mandateText;
+        }
+
+        // Window Onload Initialization
+        window.onload = function() {
+            updateLegacyDatumInfo();
+            initEGMTiltChart();
+            calculateRasterShift();
+            updateFlightCalc();
+            evaluateASPRS();
+            calculateLicensing();
+        };
+    </script>
+</body>
+</html>
