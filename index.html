@@ -879,6 +879,23 @@
                         <label class="check-item"><input type="checkbox" data-item><span>On landing: .MRK + .OBS + .BIN present, image/manifest counts agree, all files copied</span></label>
                     </div>
                 </div>
+
+                <!-- Job Aid: Fly / Delay / Stand Down -->
+                <div class="job-aid bg-white rounded-xl p-5 shadow-sm border-2 border-teal-200" data-aid="standdown">
+                    <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
+                        <span>&#127777;&#65039; Fly · Delay · Stand Down</span>
+                        <button onclick="exportChecklist('standdown')" class="no-print text-[10px] bg-teal-700 text-white px-2 py-0.5 rounded font-semibold hover:bg-teal-600">Export</button>
+                    </h3>
+                    <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">There are three decisions, not two — most missions are lost by treating it as fly-or-cancel when the correct answer is often to wait two hours. An atoll gives an aircraft few places to land and no shelter from a change in the wind, so the weather decision is made <strong class="text-slate-900">more conservatively</strong> here than at an inland site, against stated numbers written into the plan — not against how keen the team is after a long journey.</p>
+                    <div class="mt-2 space-y-1.5 text-[11px]">
+                        <label class="check-item"><input type="checkbox" data-item><span>Operating limits written into the plan <em>before</em> the mission — wind at operating height, light, rain/salt</span></label>
+                        <label class="check-item"><input type="checkbox" data-item><span>Wind at operating height inside limits (battery spent holding position is battery not spent on lines)</span></label>
+                        <label class="check-item"><input type="checkbox" data-item><span>Light enough for sharp images at the required shutter (1/1000 s)</span></label>
+                        <label class="check-item"><input type="checkbox" data-item><span>No rain or sea-salt spray — a salt-coated lens degrades every image with no warning in the log</span></label>
+                        <label class="check-item"><input type="checkbox" data-item><span>Decision recorded <em>either way</em>: fly / delay / stand down, with time and who took it</span></label>
+                        <label class="check-item"><input type="checkbox" data-item><span>If delaying: improvement forecast or observed inside the working window; if the window closes first — stand down</span></label>
+                    </div>
+                </div>
             </div>
 
         </div>
@@ -1301,6 +1318,26 @@
                 </div>
             </div>
 
+            <!-- Job Aid: Provenance & Session Tags -->
+            <div class="job-aid bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200" data-aid="provtag">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
+                    <span>&#128279; Job Aid — Provenance &amp; Session Tags (who, when, from what, how)</span>
+                    <button onclick="exportChecklist('provtag')" class="no-print text-[10px] bg-teal-700 text-white px-2.5 py-1 rounded font-semibold hover:bg-teal-600">Export (txt)</button>
+                </h3>
+                <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">Every product carries a tag that answers <em>who produced it, from which session, from what raw data, by which route</em> — so a product survives staff change and a successor can re-run it. This is the metadata half of the folder skeleton ("stranger test"): the tag works even when the path does not.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs mt-3">
+                    <label class="check-item"><input type="checkbox" data-item><span>Session tag set and findable (e.g. <code class="bg-slate-100 px-1 rounded font-mono">gis3d_2026_day2_flight04</code>)</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Producer recorded: officer/team + role + date, in metadata not just chat</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Original source filenames preserved in provenance (raw &#8594; processed chain)</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Parameters recorded (GSD target, overlap, levels, slope, correction values) — enough to re-run</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Session tag referenced in the catalogue entry and on the map attribution</span></label>
+                    <label class="check-item"><input type="checkbox" data-item><span>Tidal-stage correction (Tab 6) entries carry destination + source reference stage</span></label>
+                </div>
+                <div class="mt-3 p-2.5 bg-teal-50 border border-teal-200 rounded-lg text-[11px] text-teal-900">
+                    <strong>Rule:</strong> if a product's provenance takes more than one follow-up question to reconstruct, the tag is incomplete. The discipline is tagging at production time — retrofitting provenance to a finished map is where the record dies.
+                </div>
+            </div>
+
             <!-- Job Aid: Delivery & Archive -->
             <div class="job-aid bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200" data-aid="delivery">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
@@ -1530,6 +1567,26 @@
                 </div>
             </div>
 
+            <!-- Sand-mining monitoring card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-stone-300">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#9968;&#65039; Sand-Mining Hotspots — a change rate is not a diagnosis</span>
+                    <span class="text-xs bg-stone-100 text-stone-700 font-mono px-2 py-0.5 rounded">Day 1 · S6</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    Sand and aggregate extraction from beaches and reef flats is a recognised pressure on Kiribati coastlines, and it interacts directly with the hazard being mapped. Extraction steeps the beach and lowers the reef flat — and a change rate <em>partly caused by extraction looks identical to one caused by erosion</em>. That is why the shoreline change indicators above cannot be interpreted alone.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2 text-[11px] mb-3">
+                    <div class="p-2.5 bg-stone-50 rounded-lg border border-stone-200"><strong class="text-stone-900 block mb-0.5">1 · Bare substrate</strong><span class="text-stone-700">New or enlarged bare, disturbed sand/gravel on a beach or reef flat.</span></div>
+                    <div class="p-2.5 bg-stone-50 rounded-lg border border-stone-200"><strong class="text-stone-900 block mb-0.5">2 · Shape change</strong><span class="text-stone-700">A beach re-shaped between two dates rather than changing gradually.</span></div>
+                    <div class="p-2.5 bg-stone-50 rounded-lg border border-stone-200"><strong class="text-stone-900 block mb-0.5">3 · New tracks</strong><span class="text-stone-700">Tracks reaching a previously inaccessible stretch of shore.</span></div>
+                    <div class="p-2.5 bg-stone-50 rounded-lg border border-stone-200"><strong class="text-stone-900 block mb-0.5">4 · Stockpiles</strong><span class="text-stone-700">Accumulations of aggregate near a settlement.</span></div>
+                </div>
+                <div class="p-2.5 bg-stone-100 border-l-4 border-stone-500 rounded text-xs text-stone-900">
+                    <strong class="font-semibold">Rule:</strong> none of the four signatures alone is proof. Two or more together, at the same place, across more than one image date, becomes a finding worth recording and checking in the field. Remote identification produces <em>candidate sites, not confirmed ones</em> — output a shortlist for field verification, never a count of extraction present. Presenting remote screening as anything more puts the division in a position it cannot defend.
+                </div>
+            </div>
+
             <!-- Interactive climate scenario builder -->
             <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-teal-200">
                 <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1 flex items-center justify-between">
@@ -1653,6 +1710,37 @@
                 </div>
                 <div class="p-2.5 bg-purple-50 border-l-4 border-purple-500 rounded text-xs text-purple-900">
                     <strong class="font-semibold">Rule:</strong> hazard and exposure are never merged before distribution, and the zoning product always names its three inputs. A zone is a decision-support statement with an expiry date, not a fact about the ground.
+                </div>
+            </div>
+
+            <!-- Exposure & counting methodology card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border-2 border-emerald-200">
+                <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2 flex items-center justify-between">
+                    <span>&#128202; Exposure &amp; Counting — a count is a finding, or it is a number</span>
+                    <span class="text-xs bg-emerald-100 text-emerald-800 font-mono px-2 py-0.5 rounded">Day 1 · S5</span>
+                </h3>
+                <p class="text-xs text-slate-600 leading-relaxed mb-3">
+                    Hazard extent is a statement about <em>water</em>; exposure is a statement about <em>what the water would reach</em>. Two separate layers — the exposure layer is revised when buildings data updates; the hazard layer is revised when a new DEM or level arrives. Groundwater and well records are mapped as explicit exposure here, because on an atoll the freshwater lens is the resource inundation most directly threatens.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] mb-3">
+                    <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100"><strong class="text-emerald-900 block mb-0.5">HOTOSM buildings</strong><span class="text-emerald-900/70">Finest-grained exposure layer. Crowd-derived, <em>not a cadastre</em> — no tenure, no function. Coverage good on South Tarawa; <strong>uneven on outer islands — state completeness whenever a count is quoted.</strong></span></div>
+                    <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100"><strong class="text-emerald-900 block mb-0.5">PopGIS3 population</strong><span class="text-emerald-900/70">The human dimension at coarser resolution — the layer that turns footprints into people.</span></div>
+                    <div class="p-2.5 bg-emerald-50 rounded-lg border border-emerald-100"><strong class="text-emerald-900 block mb-0.5">Admin boundaries</strong><span class="text-emerald-900/70">The reporting frame — counts attributed to council area, island or ward so decisions can act on them.</span></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3 text-xs">
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Count + sensitivity</div>
+                        <p class="text-[11px] text-slate-700 leading-relaxed">Once hazard and exposure share a coordinate system, the intersection gives the exposed set. A building fully inside is exposed; partly inside, to the depth of the overlap; one metre outside is not counted, though a slightly higher level would include it. <strong class="text-slate-900">Report the count and the sensitivity</strong> — how it changes if the level moves ±10 cm. A single count with no sensitivity is the weaker statement.</p>
+                    </div>
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1">Three checks before a count leaves</div>
+                        <ul class="text-[11px] text-slate-700 space-y-1 list-disc ml-4 leading-relaxed">
+                            <li>Hazard and exposure share a coordinate system;</li>
+                            <li>hazard carries its stated water level and vertical reference (m TGZ);</li>
+                            <li>exposure has known coverage and currency (the one most often skipped).</li>
+                        </ul>
+                        <p class="text-[11px] text-slate-700 mt-1.5 leading-relaxed"><strong class="text-slate-900">A count that survives those three checks is a finding. A count that does not is a number.</strong></p>
+                    </div>
                 </div>
             </div>
 
